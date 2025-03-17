@@ -127,10 +127,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="FileProcessor.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="FileProcessor.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
