@@ -1,5 +1,5 @@
-Привет
-Солнце
-Луна
-Дерево
-Река
+SingleWord
+OneWord
+JustOne
+Single
+End

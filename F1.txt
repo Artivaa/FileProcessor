@@ -1,10 +1,10 @@
-Привет
-Мир программирования
-Солнце
-Звезды светят ярко
-Луна
-Облака плывут медленно
-Дерево
-Птицы поют утром
-Река
-Горы стоят величественно
+Hello world
+SingleWord
+Another line with multiple words
+OneWord
+Two words here
+JustOne
+Multiple words again
+Single
+Last line with one word
+End

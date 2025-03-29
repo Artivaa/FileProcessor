@@ -1,120 +1,111 @@
 #include <iostream>
 #include <fstream>
-#include <windows.h>
 
-// Функция для безопасного копирования строк
-void safeStrCopy(char* dest, const char* src, size_t size)
-{
-    strcpy_s(dest, size, src);
+const int MAX_LINE = 255; // Максимальная длина строки
+
+// Функция для формирования файла
+void createFile(const char* filename) {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Ошибка при создании файла " << filename << std::endl;
+        return;
+    }
+    file << "Hello world\n";
+    file << "SingleWord\n";
+    file << "Another line with multiple words\n";
+    file << "OneWord\n";
+    file << "Two words here\n";
+    file << "JustOne\n";
+    file << "Multiple words again\n";
+    file << "Single\n";
+    file << "Last line with one word\n";
+    file << "End\n";
+    file.close();
+    std::cout << "Файл " << filename << " успешно создан.\n";
 }
 
-// Создание входного файла F1 с заранее заданным содержимым
-void createInputFile(const char* inputFileName)
-{
-    std::ofstream outFile(inputFileName);
-    if (outFile.is_open())
-    {
-        outFile << "Привет\n";
-        outFile << "Мир программирования\n";
-        outFile << "Солнце\n";
-        outFile << "Звезды светят ярко\n";
-        outFile << "Луна\n";
-        outFile << "Облака плывут медленно\n";
-        outFile << "Дерево\n";
-        outFile << "Птицы поют утром\n";
-        outFile << "Река\n";
-        outFile << "Горы стоят величественно\n";
-        outFile.close();
+// Функция для печати файла
+void printFile(const char* filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Ошибка при открытии файла " << filename << std::endl;
+        return;
     }
-    else
-    {
-        std::cout << "Не удалось создать входной файл\n";
+    char line[MAX_LINE];
+    std::cout << "Содержимое файла " << filename << ":\n";
+    while (file.getline(line, MAX_LINE)) {
+        std::cout << line << std::endl;
     }
+    file.close();
 }
 
-// Проверка строки на наличие единственного слова
-bool hasSingleWord(const char* line)
-{
-    int spaceCount = 0;
-    for (int i = 0; line[i] != '\0'; i++)
-    {
-        if (line[i] == ' ')
-        {
-            spaceCount++;
+// Функция для копирования строк с одним словом
+void copySingleWordLines(const char* source, const char* destination) {
+    std::ifstream srcFile(source);
+    std::ofstream destFile(destination);
+    if (!srcFile.is_open() || !destFile.is_open()) {
+        std::cerr << "Ошибка при работе с файлами\n";
+        if (srcFile.is_open()) srcFile.close();
+        if (destFile.is_open()) destFile.close();
+        return;
+    }
+    char line[MAX_LINE];
+    while (srcFile.getline(line, MAX_LINE)) {
+        char temp[MAX_LINE];
+        strcpy_s(temp, MAX_LINE, line); // Используем strcpy_s вместо strcpy
+        char* context = nullptr;
+        char* token = strtok_s(temp, " \t", &context); // Используем strtok_s вместо strtok
+        int wordCount = 0;
+        while (token != nullptr) {
+            wordCount++;
+            token = strtok_s(nullptr, " \t", &context);
+        }
+        if (wordCount == 1) {
+            destFile << line << std::endl;
         }
     }
-    return spaceCount == 0;
+    srcFile.close();
+    destFile.close();
+    std::cout << "Строки с одним словом скопированы из " << source << " в " << destination << "\n";
 }
 
-// Копирование строк с одним словом из F1 в F2
-void copySingleWordLines(const char* inputFileName, const char* outputFileName)
-{
-    std::ifstream inFile(inputFileName);
-    std::ofstream outFile(outputFileName);
-
-    if (inFile.is_open() && outFile.is_open())
-    {
-        char line[256];
-        while (inFile.getline(line, 256))
-        {
-            if (hasSingleWord(line))
-            {
-                outFile << line << "\n";
-            }
+// Функция для нахождения самого длинного слова
+void findLongestWord(const char* filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Ошибка при открытии файла " << filename << std::endl;
+        return;
+    }
+    char longestWord[MAX_LINE] = "";
+    size_t maxLength = 0;
+    char line[MAX_LINE];
+    while (file.getline(line, MAX_LINE)) {
+        size_t length = std::strlen(line);
+        if (length > maxLength) {
+            maxLength = length;
+            strcpy_s(longestWord, MAX_LINE, line); // Используем strcpy_s вместо strcpy
         }
-        inFile.close();
-        outFile.close();
     }
-    else
-    {
-        std::cout << "Ошибка при открытии файлов\n";
+    file.close();
+    if (maxLength > 0) {
+        std::cout << "Самое длинное слово в файле " << filename << ": " << longestWord
+            << " (длина: " << maxLength << ")\n";
     }
-}
-
-// Поиск самого длинного слова в файле F2
-void findLongestWord(const char* outputFileName, char* result)
-{
-    std::ifstream inFile(outputFileName);
-    char currentWord[256] = "";
-    result[0] = '\0';
-
-    if (inFile.is_open())
-    {
-        while (inFile.getline(currentWord, 256))
-        {
-            if (strlen(currentWord) > strlen(result))
-            {
-                strcpy_s(result, 256, currentWord);
-            }
-        }
-        inFile.close();
+    else {
+        std::cout << "Файл " << filename << " пуст.\n";
     }
 }
 
-// Основная функция обработки: копирование и поиск
-void processLongestWord(const char* inputFileName, const char* outputFileName, char* result)
-{
-    copySingleWordLines(inputFileName, outputFileName);
-    findLongestWord(outputFileName, result);
-}
+int main() {
+    setlocale(LC_ALL, "Rus");
+    const char* f1 = "F1.txt";
+    const char* f2 = "F2.txt";
 
-// Точка входа в программу
-int main()
-{
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-
-    char inputFileName[256];
-    char outputFileName[256];
-    char longestWord[256];
-
-    safeStrCopy(inputFileName, "F1.txt", 256);
-    safeStrCopy(outputFileName, "F2.txt", 256);
-
-    createInputFile(inputFileName);
-    processLongestWord(inputFileName, outputFileName, longestWord);
-
-    std::cout << "Самое длинное слово из F2: " << longestWord << "\n";
+    createFile(f1);              // Формирование файла F1.txt
+    printFile(f1);               // Печать файла F1.txt
+    copySingleWordLines(f1, f2); // Копирование строк с одним словом в F2.txt
+    printFile(f2);               // Печать файла F2.txt
+    findLongestWord(f2);         // Поиск самого длинного слова в F2.txt
 
     return 0;
 }
